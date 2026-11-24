@@ -2,7 +2,7 @@
 
 Snap a window to quarters of the screen width and height, eighths of the width on a wide screen, or your own fractions, when you resize it with the mouse in [Omarchy](https://omarchy.org/).
 
-- Drag a window edge (or SUPER + right drag). When the dragged edge comes within 2% of the screen width of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
+- Drag a window edge (or SUPER + right drag). When the dragged edge comes within 40 pixels of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
 - Let go, and the edge snaps there. Only the dragged edge moves, so only the neighbour on that side changes.
 - Works with dwindle (any number of windows in a row, stacks and groups included), with the scrolling layout (column width) and with floating windows.
 
@@ -37,7 +37,7 @@ dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
   wide_widths = { "1/4", "1/2", "3/4" }, -- default eighths, "1/8" to "7/8"
   wide = 2400, -- screens at least this wide (logical px) use wide_widths
   heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} turns height snapping off
-  tolerance = 0.02, -- how close the edge must come, as a share of the screen width (the same pixels on both axes)
+  tolerance = 40, -- how close the edge must come, in logical pixels, on both axes
 })
 ```
 

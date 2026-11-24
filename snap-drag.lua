@@ -1,6 +1,6 @@
 -- Snap the focused window to a fraction of the screen width or height after
 -- a resize with the mouse (SUPER + right drag, or a drag on a border), when
--- the dragged edge ends within 2% of the screen width of one. By default that
+-- the dragged edge ends within 40 px of one. By default that
 -- is quarters of the height, and quarters of the width, or eighths on a wide
 -- screen. Only the dragged edge moves, so only the neighbour on that side
 -- changes. While an edge is within reach of a snap point, the exe.snap shell
@@ -13,7 +13,7 @@
 --     wide_widths = { "1/4", "1/2", "3/4" }, -- default eighths, "1/8" to "7/8"
 --     wide = 2400, -- screens at least this wide (logical px) use wide_widths
 --     heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} snaps no heights
---     tolerance = 0.02, -- reach, as a share of the screen width (on both axes)
+--     tolerance = 40, -- reach in logical px, on both axes
 --   })
 --
 -- The binds watch the left and right mouse buttons without taking them from
@@ -24,7 +24,7 @@ local snap = os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap.sh"
 -- Snap points as { share, label }, from setup: x on a narrow screen, wide on
 -- a wide one, y for heights.
 local fractions = { x = {}, wide = {}, y = {} }
-local tolerance = 0.02
+local tolerance = 40 -- logical px
 local wide = 2400
 
 local near = { x = "left", y = "top" }
@@ -71,11 +71,6 @@ local function reach(now)
     return r[near[axis]] + go[near[axis]], size[axis] - r[far[axis]] - go[far[axis]]
   end
 
-  -- The reach in pixels, the same on both axes: tolerance is a share of the
-  -- usable screen width.
-  local wfrom, wto = span("x")
-  local reach_px = tolerance * (wto - wfrom)
-
   local hits, guides = {}, {}
   for _, a in ipairs({ "x", "y" }) do
     if now.size[a] ~= pressed.size[a] then
@@ -84,7 +79,7 @@ local function reach(now)
       local length = now.size[a] + 2 * b + sp
       local list = a == "y" and "y" or size.x >= wide and "wide" or "x"
       for _, f in ipairs(fractions[list]) do
-        if math.abs((to - from + sp) * f[1] - length) <= reach_px then
+        if math.abs((to - from + sp) * f[1] - length) <= tolerance then
           -- The near edge moved when the window's position did; otherwise the far one.
           local edge = now.at[a] ~= pressed.at[a] and near[a] or far[a]
           local mine = round((to - from + sp) * f[1]) - sp
