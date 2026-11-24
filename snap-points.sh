@@ -10,7 +10,7 @@
 # the usable screen that snap-drag.lua measures. A share within 16 px of a
 # fraction with a denominator up to 12 is written as that fraction, any other
 # as a number with three decimals. An axis where every window spans the whole
-# screen is left out, so it keeps the global snap points.
+# screen (over 95%, which leaves room for a group bar) is left out, so it keeps the global snap points.
 set -euo pipefail
 
 ws=${1:-$(hyprctl activeworkspace -j | jq -r '.id')}
@@ -39,7 +39,10 @@ hyprctl clients -j | jq -r --argjson ws "$workspace" --argjson m "$mon" --argjso
       | if length > 0 then (.[0] | "\"\(.[0])/\(.[1])\"") else ($share * 1000 | round) / 1000 | tostring end;
     def points($k):
       [ .[] | (.size[$k] + 2 * $b + $sp[$k]) / $span[$k] ]
-      | map(select(. < 0.99)) | unique_by(. * 1000 | round)
+      # ponytail: a group bar takes some height off a grouped window, so a share
+      # above 0.95 counts as the whole screen; read the bar height if a real
+      # snap point up there is ever wanted.
+      | map(select(. < 0.95)) | unique_by(. * 1000 | round)
       | map(fraction(.; $span[$k])) | unique;
   [ .[] | select(.workspace.id == $ws.id and (.floating | not) and (.hidden | not)) ]
   | unique_by(.at)
