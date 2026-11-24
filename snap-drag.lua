@@ -15,16 +15,26 @@
 --     wide = 2400, -- screens at least this wide (logical px) use wide_widths
 --     heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} snaps no heights
 --     tolerance = 40, -- reach in logical px, on both axes
+--     workspaces = { -- own snap points per workspace, by id or name
+--       [3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },
+--       ["special:scratch"] = { heights = {} },
+--     },
 --   })
+--
+-- A workspace entry takes widths, wide_widths and heights; what it leaves out
+-- comes from the options above. Its widths count on wide screens too, unless
+-- it gives wide_widths as well.
 --
 -- The binds watch the left and right mouse buttons without taking them from
 -- apps (non_consuming, transparent). While a button is down a timer checks the
 -- focused window's size every 30 ms; a plain click never changes it, so it
 -- costs a few table lookups and starts no process.
 local snap = os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap.sh"
--- Snap points as { share, label }, from setup: x on a narrow screen, wide on
--- a wide one, y for heights.
+-- Snap points as lists of { share, label }, from setup: x on a narrow screen,
+-- wide on a wide one, y for heights. per_workspace holds the same lists, only
+-- those a workspace sets, by workspace id or name.
 local fractions = { x = {}, wide = {}, y = {} }
+local per_workspace = {}
 local tolerance = 40 -- logical px
 local wide = 2400
 
@@ -106,7 +116,9 @@ local function reach(now)
       local sp = 2 * gi[near[a]]
       local length = now.size[a] + 2 * b + sp
       local list = a == "y" and "y" or size.x >= wide and "wide" or "x"
-      for _, f in ipairs(fractions[list]) do
+      local ws = now.window.workspace
+      local own = ws and (per_workspace[ws.id] or per_workspace[ws.name]) or {}
+      for _, f in ipairs(own[list] or fractions[list]) do
         if math.abs((to - from + sp) * f[1] - length) <= tolerance then
           -- The near edge moved when the window's position did; otherwise the far one.
           local edge = now.at[a] ~= pressed.at[a] and near[a] or far[a]
@@ -140,7 +152,7 @@ local function show(next)
   shown = next
 end
 
--- A width as "a/b" or a share such as 0.4: { share, label }.
+-- A snap point as "a/b" or a share such as 0.4: { share, label }.
 local function fraction(w)
   local a, b = tostring(w):match("^%s*(%d+)%s*/%s*(%d+)%s*$")
   local share = a and tonumber(a) / tonumber(b) or tonumber(w)
@@ -154,16 +166,24 @@ return function(opts)
   opts = opts or {}
   tolerance = opts.tolerance or tolerance
   wide = opts.wide or wide
-  local quarters = { "1/4", "1/2", "3/4" }
-  local eighths = { "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8" }
-  for list, given in pairs({
-    x = opts.widths or quarters,
-    wide = opts.wide_widths or eighths,
-    y = opts.heights or quarters,
-  }) do
+  local function parse(given)
+    local list = {}
     for _, w in ipairs(given) do
-      table.insert(fractions[list], fraction(w))
+      table.insert(list, fraction(w))
     end
+    return list
+  end
+  fractions = {
+    x = parse(opts.widths or { "1/4", "1/2", "3/4" }),
+    wide = parse(opts.wide_widths or { "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8" }),
+    y = parse(opts.heights or { "1/4", "1/2", "3/4" }),
+  }
+  for key, o in pairs(opts.workspaces or {}) do
+    local own = {}
+    own.x = o.widths and parse(o.widths)
+    own.wide = o.wide_widths and parse(o.wide_widths) or own.x
+    own.y = o.heights and parse(o.heights)
+    per_workspace[key] = own
   end
 
   local timer = hl.timer(function()

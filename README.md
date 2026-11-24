@@ -43,18 +43,46 @@ dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
   wide = 2400, -- screens at least this wide (logical px) use wide_widths
   heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} turns height snapping off
   tolerance = 40, -- how close the edge must come, in logical pixels, on both axes
+  workspaces = { -- own snap points per workspace, by id or name
+    [3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },
+    ["special:scratch"] = { heights = {} },
+  },
 })
 ```
+
+The options above are the default snap points, used on every workspace. A `workspaces` entry overrides them on that workspace: it takes `widths`, `wide_widths` and `heights`, and what it leaves out comes from the defaults. Its `widths` count on wide screens too, unless it also sets `wide_widths`.
 
 Each snap point is the window's size as a part of the usable screen width (or height), written one of two ways:
 
 - a fraction as a string, such as `"1/3"`: the window takes a third of the screen. The guide line shows it as "1/3".
 - a number between 0 and 1, such as `0.4`: the window takes 40% of the screen. The guide line shows it as "40%".
 
+## Snap points from a layout
+
+Arrange the windows on a workspace the way you like them, then run:
+
+```bash
+~/.config/omarchy/plugins/exe.snap/snap-points.sh 3   # workspace id or name; default the active one
+```
+
+It prints a `workspaces` entry with each window's width and height as a snap point, e.g. `[3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },`, ready to paste into the options.
+
+### AI skill
+
+`skills/window-snap-points` is an agent skill (Claude Code and other agents that read `SKILL.md`) that does this for you: it reads the workspace, shows you the snap points, and adds them to your `dofile` options. Install it with:
+
+```bash
+ln -s ~/.config/omarchy/plugins/exe.snap/skills/window-snap-points ~/.claude/skills/window-snap-points
+```
+
+Then ask your agent to "save this workspace's layout as snap points".
+
 ## Files
 
 - `snap-drag.lua` watches mouse resizes inside Hyprland and decides when to snap.
 - `snap.sh <fraction> <left|right|top|bottom> [address]` moves the dragged edge of that window (default the focused one).
+- `snap-points.sh [workspace]` prints snap points from a workspace's current layout.
+- `skills/window-snap-points/SKILL.md` is the agent skill that uses it.
 - `Snap.qml` is the shell overlay that draws the guide line.
 
 ## Uninstall
