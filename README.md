@@ -19,6 +19,11 @@ A corner drag shows a line for each axis:
 - Scrolling layout: `colresize` decides which side of the column grows, so the other edge may move too. Heights there are untested.
 - A nested split such as A | (B / (C | D)), seen from A, puts C and D in the row too; their boundary stays where it is.
 
+## Requirements
+
+- Omarchy with its Lua Hyprland config (Hyprland 0.56 or later) and the Omarchy shell.
+- `jq` and `hyprctl`, which Omarchy ships.
+
 ## Install
 
 ```bash
