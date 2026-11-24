@@ -2,9 +2,15 @@
 
 Snap a window to quarters of the screen width and height, eighths of the width on a wide screen, or your own fractions, when you resize it with the mouse in [Omarchy](https://omarchy.org/).
 
+![Dragging window edges: a guide line shows the snap point, and the edge snaps to it on release](docs/demo.gif)
+
 - Drag a window edge (or SUPER + right drag). When the dragged edge comes within 40 pixels of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
 - Let go, and the edge snaps there. Only the dragged edge moves, so only the neighbour on that side changes.
 - Works with dwindle (any number of windows in a row, stacks and groups included), with the scrolling layout (column width) and with floating windows.
+
+A corner drag shows a line for each axis:
+
+![Guide lines for 3/8 of the width and 3/4 of the height](docs/guides.png)
 
 ## Known limits
 
