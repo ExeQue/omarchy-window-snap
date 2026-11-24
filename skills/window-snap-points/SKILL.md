@@ -23,7 +23,7 @@ The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exeque.omarchy-window
    [3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },
    ```
 
-   Each tiled window's width and height is a snap point, written as a fraction up to twelfths when one is within 16 px, else as a number between 0 and 1. An axis where every window spans the whole screen is left out, so that axis keeps the default snap points. If it prints a comment instead (every window spans the whole screen), tell the user there is nothing to snap to and stop.
+   Each tiled window's width and height is a snap point, written as a fraction up to twelfths when one is within 16 px, else as a number between 0 and 1. When every window spans the whole width, `widths` is left out, so the width keeps the default snap points. When every window spans the whole height, it writes `heights = {}`, which turns height snapping off on that workspace; say so when you show the result. If it prints a comment instead (every window spans the whole screen), tell the user there is nothing to snap to and stop.
 
 3. **Show the user the snap points** in plain words (e.g. "widths 1/3 and 2/3, heights 1/2") and ask before changing their config. Offer to add the defaults' points too when the layout gives only one or two per axis, since a workspace's own list replaces the default list for that axis.
 

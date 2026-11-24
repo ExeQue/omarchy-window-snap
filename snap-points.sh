@@ -9,8 +9,10 @@
 # Each tiled window's width and height become a snap point, as the share of
 # the usable screen that snap-drag.lua measures. A share within 16 px of a
 # fraction with a denominator up to 12 is written as that fraction, any other
-# as a number with three decimals. An axis where every window spans the whole
-# screen (over 95%, which leaves room for a group bar) is left out, so it keeps the global snap points.
+# as a number with three decimals. A size over 95% of the screen counts as the
+# whole screen (that leaves room for a group bar). When every window spans the
+# whole width, widths are left out, so they keep the default snap points; when
+# every window spans the whole height, heights = {} turns height snapping off.
 set -euo pipefail
 
 ws=${1:-$(hyprctl activeworkspace -j | jq -r '.id')}
@@ -48,6 +50,6 @@ hyprctl clients -j | jq -r --argjson ws "$workspace" --argjson m "$mon" --argjso
   | unique_by(.at)
   | (if $ws.name == ($ws.id | tostring) then "[\($ws.id)]" else "[\($ws.name | tojson)]" end) as $key
   | [ (points(0) | select(length > 0) | "widths = { \(join(", ")) }"),
-      (points(1) | select(length > 0) | "heights = { \(join(", ")) }") ] as $parts
-  | if $parts == [] then "-- \($key): every window spans the whole screen; nothing to snap to"
+      (points(1) | if length > 0 then "heights = { \(join(", ")) }" else "heights = {}" end) ] as $parts
+  | if $parts == ["heights = {}"] then "-- \($key): every window spans the whole screen; nothing to snap to"
     else "\($key) = { \($parts | join(", ")) }," end'
