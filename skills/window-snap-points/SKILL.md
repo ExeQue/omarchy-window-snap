@@ -1,11 +1,11 @@
 ---
 name: window-snap-points
-description: Turn a Hyprland workspace's current window layout into snap points for the Omarchy Window Snap plugin (exe.snap), so a mouse resize on that workspace snaps back to the same widths and heights. Use when asked to save, capture or copy a workspace layout as snap points, to set per-workspace snap points, or to make a workspace snap to the sizes its windows have now.
+description: Turn a Hyprland workspace's current window layout into snap points for the Omarchy Window Snap plugin (exeque.omarchy-window-snap), so a mouse resize on that workspace snaps back to the same widths and heights. Use when asked to save, capture or copy a workspace layout as snap points, to set per-workspace snap points, or to make a workspace snap to the sizes its windows have now.
 ---
 
 # Window snap points from a workspace layout
 
-The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exe.snap`) snaps a window's width and height to snap points after a mouse resize. It has a default set of snap points, and each workspace can override them with its own. This skill writes such an override from the windows a workspace has now.
+The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exeque.omarchy-window-snap`) snaps a window's width and height to snap points after a mouse resize. It has a default set of snap points, and each workspace can override them with its own. This skill writes such an override from the windows a workspace has now.
 
 ## Steps
 
@@ -14,7 +14,7 @@ The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exe.snap`) snaps a wi
 2. **Read the layout.** Run:
 
    ```bash
-   ~/.config/omarchy/plugins/exe.snap/snap-points.sh <workspace>
+   ~/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-points.sh <workspace>
    ```
 
    It prints one Lua line, a `workspaces` entry such as:
@@ -30,7 +30,7 @@ The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exe.snap`) snaps a wi
 4. **Find the setup call.** It is the line that loads `snap-drag.lua`, usually in `~/.config/hypr/bindings.lua`:
 
    ```bash
-   grep -rn "exe.snap/snap-drag.lua" ~/.config/hypr/
+   grep -rn "exeque.omarchy-window-snap/snap-drag.lua" ~/.config/hypr/
    ```
 
 5. **Add the entry to the options table** of that call, inside `workspaces`, keeping every other option as it is:
@@ -41,14 +41,14 @@ The Omarchy Window Snap plugin (`~/.config/omarchy/plugins/exe.snap`) snaps a wi
    Write it over several lines when the table grows past one line:
 
    ```lua
-   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
+   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-drag.lua")({
      workspaces = {
        [3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },
      },
    })
    ```
 
-6. **Check it.** Run `hyprctl reload`, then `hyprctl configerrors`; it must print nothing. A bad snap point shows up there as `exe.snap: bad size ...`.
+6. **Check it.** Run `hyprctl reload`, then `hyprctl configerrors`; it must print nothing. A bad snap point shows up there as `exeque.omarchy-window-snap: bad size ...`.
 
 ## Notes
 

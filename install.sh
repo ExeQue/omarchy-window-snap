@@ -11,15 +11,15 @@ file=$hypr/bindings.lua
 
 # Any line that mentions snap-drag.lua outside a comment counts: the call may
 # carry options over several lines, or sit in another file.
-loaded='^[[:space:]]*[^-[:space:]].*exe\.snap/snap-drag\.lua'
+loaded='^[[:space:]]*[^-[:space:]].*exeque\.omarchy-window-snap/snap-drag\.lua'
 if grep -rEqs --include='*.lua' "$loaded" "$hypr"; then
   echo "Hyprland already loads snap-drag.lua ($(grep -rEls --include='*.lua' "$loaded" "$hypr" | head -1))"
 else
   cat >>"$file" <<'EOF'
 
--- Snap window width and height to fractions of the screen after a mouse resize (exe.snap plugin).
--- Options (widths, wide_widths, wide, heights, tolerance, workspaces): see ~/.config/omarchy/plugins/exe.snap/README.md
-dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")()
+-- Snap window width and height to fractions of the screen after a mouse resize (exeque.omarchy-window-snap plugin).
+-- Options (widths, wide_widths, wide, heights, tolerance, workspaces): see ~/.config/omarchy/plugins/exeque.omarchy-window-snap/README.md
+dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-drag.lua")()
 EOF
   echo "Added snap-drag.lua to $file"
 fi

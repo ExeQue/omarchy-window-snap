@@ -3,13 +3,13 @@
 -- the dragged edge ends within 40 px of one. By default that
 -- is quarters of the height, and quarters of the width, or eighths on a wide
 -- screen. Only the dragged edge moves, so only the neighbour on that side
--- changes. While an edge is within reach of a snap point, the exe.snap shell
+-- changes. While an edge is within reach of a snap point, the exeque.omarchy-window-snap shell
 -- plugin draws a line where it will land.
 -- Loaded from ~/.config/hypr/bindings.lua; the file returns a setup function
 -- (every option can be left out; a snap point is "a/b", or a number between
 -- 0 and 1 such as 0.4 for 40% of the screen):
 --
---   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
+--   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-drag.lua")({
 --     widths = { "1/3", "1/2", "2/3" }, -- default { "1/4", "1/2", "3/4" }
 --     wide_widths = { "1/4", "1/2", "3/4" }, -- default eighths, "1/8" to "7/8"
 --     wide = 2400, -- screens at least this wide (logical px) use wide_widths
@@ -29,7 +29,7 @@
 -- apps (non_consuming, transparent). While a button is down a timer checks the
 -- focused window's size every 30 ms; a plain click never changes it, so it
 -- costs a few table lookups and starts no process.
-local snap = os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap.sh"
+local snap = os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap.sh"
 -- Snap points as lists of { share, label }, from setup: x on a narrow screen,
 -- wide on a wide one, y for heights. per_workspace holds the same lists, only
 -- those a workspace sets, by workspace id or name.
@@ -146,9 +146,9 @@ local function show(next)
     return
   end
   if next then
-    hl.exec_cmd("omarchy-shell shell summon exe.snap '" .. next.payload .. "'")
+    hl.exec_cmd("omarchy-shell shell summon exeque.omarchy-window-snap '" .. next.payload .. "'")
   elseif shown then
-    hl.exec_cmd("omarchy-shell shell hide exe.snap")
+    hl.exec_cmd("omarchy-shell shell hide exeque.omarchy-window-snap")
   end
   shown = next
 end
@@ -158,7 +158,7 @@ local function fraction(w)
   local a, b = tostring(w):match("^%s*(%d+)%s*/%s*(%d+)%s*$")
   local share = a and tonumber(a) / tonumber(b) or tonumber(w)
   if not share or share <= 0 or share >= 1 then
-    error("exe.snap: bad size " .. tostring(w) .. ", use \"1/3\" or a share between 0 and 1")
+    error("exeque.omarchy-window-snap: bad size " .. tostring(w) .. ", use \"1/3\" or a share between 0 and 1")
   end
   return { share, a and (a .. "/" .. b) or string.format("%g%%", share * 100) }
 end

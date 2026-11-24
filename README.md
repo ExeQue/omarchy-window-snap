@@ -28,13 +28,13 @@ A corner drag shows a line for each axis:
 
 ```bash
 omarchy plugin add https://github.com/ExeQue/omarchy-window-snap --enable
-~/.config/omarchy/plugins/exe.snap/install.sh
+~/.config/omarchy/plugins/exeque.omarchy-window-snap/install.sh
 ```
 
 The first line installs the plugin and its guide lines in the shell. The second turns on the snapping itself: Omarchy loads no Hyprland files from plugins, so `install.sh` adds this line to `~/.config/hypr/bindings.lua` (unless your Hyprland config already has it), reloads Hyprland and checks for config errors:
 
 ```lua
-dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")()
+dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-drag.lua")()
 ```
 
 If the guide lines do not show, restart the shell once: `omarchy restart shell`.
@@ -44,7 +44,7 @@ If the guide lines do not show, restart the shell once: `omarchy restart shell`.
 By default the width snaps to quarters, or to eighths on a screen at least 2400 logical pixels wide, and the height to quarters. Pass your own snap points, as fractions or shares of the screen, to the `dofile` line; every option can be left out:
 
 ```lua
-dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
+dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-drag.lua")({
   widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
   wide_widths = { "1/4", "1/2", "3/4" }, -- default eighths, "1/8" to "7/8"
   wide = 2400, -- screens at least this wide (logical px) use wide_widths
@@ -69,7 +69,7 @@ Each snap point is the window's size as a part of the usable screen width (or he
 Arrange the windows on a workspace the way you like them, then run:
 
 ```bash
-~/.config/omarchy/plugins/exe.snap/snap-points.sh 3   # workspace id or name; default the active one
+~/.config/omarchy/plugins/exeque.omarchy-window-snap/snap-points.sh 3   # workspace id or name; default the active one
 ```
 
 It prints a `workspaces` entry with each window's width and height as a snap point, e.g. `[3] = { widths = { "1/3", "2/3" }, heights = { "1/2" } },`, ready to paste into the options.
@@ -79,7 +79,7 @@ It prints a `workspaces` entry with each window's width and height as a snap poi
 `skills/window-snap-points` is an agent skill that does this for you: it reads the workspace, shows you the snap points, and adds them to your `dofile` options. It is a plain `SKILL.md` in the [Agent Skills](https://agentskills.io) format, so it works in Claude Code, Codex, OpenCode, pi, GitHub Copilot CLI, Gemini CLI and other agents that read skills. Link it into the skill folders of the agents you have with:
 
 ```bash
-~/.config/omarchy/plugins/exe.snap/skill.sh
+~/.config/omarchy/plugins/exeque.omarchy-window-snap/skill.sh
 ```
 
 That links it into `~/.agents/skills` (the shared folder several agents read) and into the own folder of each agent installed (`~/.claude/skills`, `~/.codex/skills`, `~/.pi/agent/skills`, `~/.copilot/skills`, `~/.gemini/skills`, `~/.config/opencode/skills`). The links follow `omarchy plugin update`.
@@ -97,4 +97,4 @@ Then ask your agent to "save this workspace's layout as snap points".
 
 ## Uninstall
 
-Remove the `dofile` line, then `omarchy plugin remove exe.snap`.
+Remove the `dofile` line, then `omarchy plugin remove exeque.omarchy-window-snap`.
