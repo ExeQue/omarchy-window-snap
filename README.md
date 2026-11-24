@@ -1,6 +1,6 @@
 # Omarchy Window Snap
 
-Snap a window to eighths of the screen width and quarters of its height (or your own fractions) when you resize it with the mouse in [Omarchy](https://omarchy.org/).
+Snap a window to quarters of the screen width and height, eighths of the width on a wide screen, or your own fractions, when you resize it with the mouse in [Omarchy](https://omarchy.org/).
 
 - Drag a window edge (or SUPER + right drag). When the dragged edge comes within 2% of the screen width of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
 - Let go, and the edge snaps there. Only the dragged edge moves, so only the neighbour on that side changes.
@@ -21,7 +21,7 @@ omarchy plugin add https://github.com/ExeQue/omarchy-window-snap --enable
 Then load the mouse snapping from `~/.config/hypr/bindings.lua`:
 
 ```lua
--- Snap window width to eighths and height to quarters after a mouse resize (exe.snap plugin).
+-- Snap window width and height to fractions of the screen after a mouse resize (exe.snap plugin).
 dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")()
 ```
 
@@ -29,11 +29,13 @@ Hyprland reloads the config on save. Restart the shell once so it picks up the g
 
 ## Configure
 
-Pass your own snap points, as fractions or shares of the screen width and height, to the `dofile` line:
+By default the width snaps to quarters, or to eighths on a screen at least 2400 logical pixels wide, and the height to quarters. Pass your own snap points, as fractions or shares of the screen, to the `dofile` line; every option can be left out:
 
 ```lua
 dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
-  widths = { "1/3", "1/2", "2/3", 0.4 }, -- default eighths: { "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8" }
+  widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
+  wide_widths = { "1/4", "1/2", "3/4" }, -- default eighths, "1/8" to "7/8"
+  wide = 2400, -- screens at least this wide (logical px) use wide_widths
   heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} turns height snapping off
   tolerance = 0.02, -- how close the edge must come, as a share of the screen width (the same pixels on both axes)
 })
