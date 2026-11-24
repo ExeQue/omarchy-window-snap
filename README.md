@@ -46,7 +46,10 @@ dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
 })
 ```
 
-A fraction shows as itself on the guide line ("1/3"), a share as a percentage ("40%").
+Each snap point is the window's size as a part of the usable screen width (or height), written one of two ways:
+
+- a fraction as a string, such as `"1/3"`: the window takes a third of the screen. The guide line shows it as "1/3".
+- a number between 0 and 1, such as `0.4`: the window takes 40% of the screen. The guide line shows it as "40%".
 
 ## Files
 

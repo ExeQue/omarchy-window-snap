@@ -6,7 +6,8 @@
 -- changes. While an edge is within reach of a snap point, the exe.snap shell
 -- plugin draws a line where it will land.
 -- Loaded from ~/.config/hypr/bindings.lua; the file returns a setup function
--- (every option can be left out; a list may hold "a/b" or a share like 0.4):
+-- (every option can be left out; a snap point is "a/b", or a number between
+-- 0 and 1 such as 0.4 for 40% of the screen):
 --
 --   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
 --     widths = { "1/3", "1/2", "2/3" }, -- default { "1/4", "1/2", "3/4" }
