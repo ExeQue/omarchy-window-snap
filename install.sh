@@ -9,8 +9,11 @@ set -euo pipefail
 hypr=${XDG_CONFIG_HOME:-$HOME/.config}/hypr
 file=$hypr/bindings.lua
 
-if grep -rqs --include='*.lua' "exe.snap/snap-drag.lua" "$hypr"; then
-  echo "Hyprland already loads snap-drag.lua ($(grep -rls --include='*.lua' "exe.snap/snap-drag.lua" "$hypr" | head -1))"
+# Any line that mentions snap-drag.lua outside a comment counts: the call may
+# carry options over several lines, or sit in another file.
+loaded='^[[:space:]]*[^-[:space:]].*exe\.snap/snap-drag\.lua'
+if grep -rEqs --include='*.lua' "$loaded" "$hypr"; then
+  echo "Hyprland already loads snap-drag.lua ($(grep -rEls --include='*.lua' "$loaded" "$hypr" | head -1))"
 else
   cat >>"$file" <<'EOF'
 
