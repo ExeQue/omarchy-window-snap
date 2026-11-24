@@ -2,7 +2,7 @@
 
 Snap a window to quarters of the screen width and height, eighths of the width on a wide screen, or your own fractions, when you resize it with the mouse in [Omarchy](https://omarchy.org/).
 
-![Dragging window edges: a guide line shows the snap point, and the edge snaps to it on release](docs/demo.gif)
+![Dragging edges and corners of four windows: guide lines show the snap points, for width and height at once on a corner, and the edges snap to them on release](docs/demo.gif)
 
 - Drag a window edge (or SUPER + right drag). When the dragged edge comes within 40 pixels of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
 - Let go, and the edge snaps there. Only the dragged edge moves, so only the neighbour on that side changes.
