@@ -99,6 +99,14 @@ local function reach(now)
   if not pressed or now.address ~= pressed.address then
     return nil
   end
+  -- A resize keeps one edge of each axis where it was; a move shifts both. So
+  -- a drag that has shifted both edges of an axis moves the window and never
+  -- snaps, even when its size happens to differ along the way.
+  for _, a in ipairs({ "x", "y" }) do
+    if now.at[a] ~= pressed.at[a] and now.at[a] + now.size[a] ~= pressed.at[a] + pressed.size[a] then
+      return nil
+    end
+  end
   local m = now.window.monitor
   local r = m.reserved
   local b = hl.get_config("general.border_size")
