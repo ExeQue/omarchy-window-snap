@@ -21,16 +21,16 @@ A corner drag shows a line for each axis:
 
 ```bash
 omarchy plugin add https://github.com/ExeQue/omarchy-window-snap --enable
+~/.config/omarchy/plugins/exe.snap/install.sh
 ```
 
-Then load the mouse snapping from `~/.config/hypr/bindings.lua`:
+The first line installs the plugin and its guide lines in the shell. The second turns on the snapping itself: Omarchy loads no Hyprland files from plugins, so `install.sh` adds this line to `~/.config/hypr/bindings.lua` (unless your Hyprland config already has it), reloads Hyprland and checks for config errors:
 
 ```lua
--- Snap window width and height to fractions of the screen after a mouse resize (exe.snap plugin).
 dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")()
 ```
 
-Hyprland reloads the config on save. Restart the shell once so it picks up the guide line: `omarchy restart shell`.
+If the guide lines do not show, restart the shell once: `omarchy restart shell`.
 
 ## Configure
 
@@ -72,7 +72,7 @@ It prints a `workspaces` entry with each window's width and height as a snap poi
 `skills/window-snap-points` is an agent skill that does this for you: it reads the workspace, shows you the snap points, and adds them to your `dofile` options. It is a plain `SKILL.md` in the [Agent Skills](https://agentskills.io) format, so it works in Claude Code, Codex, OpenCode, pi, GitHub Copilot CLI, Gemini CLI and other agents that read skills. Link it into the skill folders of the agents you have with:
 
 ```bash
-~/.config/omarchy/plugins/exe.snap/skills/install.sh
+~/.config/omarchy/plugins/exe.snap/skill.sh
 ```
 
 That links it into `~/.agents/skills` (the shared folder several agents read) and into the own folder of each agent installed (`~/.claude/skills`, `~/.codex/skills`, `~/.pi/agent/skills`, `~/.copilot/skills`, `~/.gemini/skills`, `~/.config/opencode/skills`). The links follow `omarchy plugin update`.
@@ -84,7 +84,8 @@ Then ask your agent to "save this workspace's layout as snap points".
 - `snap-drag.lua` watches mouse resizes inside Hyprland and decides when to snap.
 - `snap.sh <fraction> <left|right|top|bottom> [address]` moves the dragged edge of that window (default the focused one).
 - `snap-points.sh [workspace]` prints snap points from a workspace's current layout.
-- `skills/window-snap-points/SKILL.md` is the agent skill that uses it; `skills/install.sh` links it into your agents.
+- `skills/window-snap-points/SKILL.md` is the agent skill that uses it; `skill.sh` links it into your agents.
+- `install.sh` turns on the snapping in Hyprland.
 - `Snap.qml` is the shell overlay that draws the guide line.
 
 ## Uninstall

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Link the skills in this folder into the skill folders of the AI agents on
+# Link the skills in skills/ into the skill folders of the AI agents on
 # this machine. Every skill is a plain SKILL.md (the Agent Skills format), so
 # the same file works in each of them.
 #
@@ -9,7 +9,7 @@
 # Run it again after adding a skill; existing links are kept.
 set -euo pipefail
 
-here=$(cd "$(dirname "$0")" && pwd)
+here=$(cd "$(dirname "$0")/skills" && pwd)
 targets=("$HOME/.agents/skills")
 for agent in \
   "$HOME/.claude:skills" \
