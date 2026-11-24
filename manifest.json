@@ -4,7 +4,7 @@
   "name": "Window Snap",
   "version": "1.0.0",
   "author": "ExeQue",
-  "description": "Snap a window to 1/4, 1/2 or 3/4 of the screen width after a mouse resize, with a guide line",
+  "description": "Snap a window to 1/4, 1/2 or 3/4 of the screen width and height after a mouse resize, with a guide line",
   "kinds": [
     "overlay"
   ],

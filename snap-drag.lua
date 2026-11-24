@@ -1,68 +1,94 @@
--- Snap the focused window to 1/4, 1/2 or 3/4 of the screen width after a
--- resize with the mouse (SUPER + right drag, or a drag on a border), when it
--- ends within 2% of one. Only the dragged edge moves, so only the neighbour
--- on that side changes. While the edge is within reach of a snap point, the
--- exe.snap shell plugin draws a line where it will land.
+-- Snap the focused window to 1/4, 1/2 or 3/4 of the screen width or height
+-- after a resize with the mouse (SUPER + right drag, or a drag on a border),
+-- when it ends within 2% of one. Only the dragged edge moves, so only the
+-- neighbour on that side changes. While the edge is within reach of a snap
+-- point, the exe.snap shell plugin draws a line where it will land.
 -- Loaded from ~/.config/hypr/bindings.lua; the file returns a setup function:
 --
 --   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
 --     widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
---     tolerance = 0.02, -- reach, as a share of the screen width
+--     heights = { "1/2" }, -- default the widths; {} snaps no heights
+--     tolerance = 0.02, -- reach, as a share of the screen width or height
 --   })
 --
 -- The binds watch the left and right mouse buttons without taking them from
 -- apps (non_consuming, transparent). While a button is down a timer checks the
--- focused window's width every 30 ms; a plain click never changes it, so it
+-- focused window's size every 30 ms; a plain click never changes it, so it
 -- costs a few table lookups and starts no process.
 local snap = os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap.sh"
-local fractions = {} -- { share, label }, from the widths given to setup
+local fractions = { x = {}, y = {} } -- per axis: { share, label }, from setup
 local tolerance = 0.02
 
+local near = { x = "left", y = "top" }
+local far = { x = "right", y = "bottom" }
+local across = { x = "y", y = "x" }
+
 local pressed = nil -- the focused window's box when the button went down
-local shown = nil -- the snap the guide line shows: { fraction, edge, payload }
+local shown = nil -- the snaps the guide lines show, from reach()
 
 local function box()
   local window = hl.get_active_window()
   if not window or not window.monitor then
     return nil
   end
-  return { window = window, address = window.address, x = window.at.x, width = window.size.x }
+  return {
+    window = window,
+    address = window.address,
+    at = { x = window.at.x, y = window.at.y },
+    size = { x = window.size.x, y = window.size.y },
+  }
 end
 
 local function round(n)
   return math.floor(n + 0.5)
 end
 
--- The snap the dragged edge is within reach of, or nil.
+-- The snaps the dragged edges are within reach of: { hits, payload } with a
+-- hit { fraction, edge } per axis, or nil. A corner drag can snap both axes;
+-- an axis whose size has not changed since the button went down never snaps.
 -- A window's box is its size plus its border on both sides, and boxes sit
 -- 2 * gaps_in apart; snap.sh works out the same numbers.
 local function reach(now)
-  if not pressed or now.address ~= pressed.address or now.width == pressed.width then
+  if not pressed or now.address ~= pressed.address then
     return nil
   end
-  local window, m = now.window, now.window.monitor
+  local m = now.window.monitor
   local r = m.reserved
   local b = hl.get_config("general.border_size")
   local gi, go = hl.get_config("general.gaps_in"), hl.get_config("general.gaps_out")
-  local sp = 2 * gi.left
-  local width = (m.transform % 2 == 1 and m.height or m.width) / m.scale
-  local height = (m.transform % 2 == 1 and m.width or m.height) / m.scale
-  local area = width - r.left - r.right - go.left - go.right
-  local share = (now.width + 2 * b + sp) / (area + sp)
+  local rot = m.transform % 2 == 1
+  local size = { x = (rot and m.height or m.width) / m.scale, y = (rot and m.width or m.height) / m.scale }
+  -- The usable stretch of the monitor along an axis, from its own origin.
+  local function span(axis)
+    return r[near[axis]] + go[near[axis]], size[axis] - r[far[axis]] - go[far[axis]]
+  end
 
-  for _, f in ipairs(fractions) do
-    if math.abs(f[1] - share) <= tolerance then
-      -- The left edge moved when the window's x did; otherwise the right one.
-      local edge = now.x ~= pressed.x and "left" or "right"
-      local mine = round((area + sp) * f[1]) - sp
-      local x = edge == "right" and now.x - b + mine or now.x + now.width + b - mine
-      local payload = string.format(
-        '{"guide":{"monitor":"%s","x":%d,"top":%d,"bottom":%d,"label":"%s"}}',
-        m.name, round(x - m.x), round(r.top + go.top), round(height - r.bottom - go.bottom), f[2])
-      return { fraction = f[1], edge = edge, payload = payload }
+  local hits, guides = {}, {}
+  for _, a in ipairs({ "x", "y" }) do
+    if now.size[a] ~= pressed.size[a] then
+      local from, to = span(a)
+      local sp = 2 * gi[near[a]]
+      local share = (now.size[a] + 2 * b + sp) / (to - from + sp)
+      for _, f in ipairs(fractions[a]) do
+        if math.abs(f[1] - share) <= tolerance then
+          -- The near edge moved when the window's position did; otherwise the far one.
+          local edge = now.at[a] ~= pressed.at[a] and near[a] or far[a]
+          local mine = round((to - from + sp) * f[1]) - sp
+          local pos = edge == far[a] and now.at[a] - b + mine or now.at[a] + now.size[a] + b - mine
+          local lo, hi = span(across[a])
+          table.insert(hits, { fraction = f[1], edge = edge })
+          table.insert(guides, string.format('{"axis":"%s","pos":%d,"from":%d,"to":%d,"label":"%s"}',
+            a, round(pos - m[a]), round(lo), round(hi), f[2]))
+          break
+        end
+      end
     end
   end
-  return nil
+  if #hits == 0 then
+    return nil
+  end
+  local payload = string.format('{"monitor":"%s","guides":[%s]}', m.name, table.concat(guides, ","))
+  return { hits = hits, payload = payload }
 end
 
 local function show(next)
@@ -82,7 +108,7 @@ local function fraction(w)
   local a, b = tostring(w):match("^%s*(%d+)%s*/%s*(%d+)%s*$")
   local share = a and tonumber(a) / tonumber(b) or tonumber(w)
   if not share or share <= 0 or share >= 1 then
-    error("exe.snap: bad width " .. tostring(w) .. ", use \"1/3\" or a share between 0 and 1")
+    error("exe.snap: bad size " .. tostring(w) .. ", use \"1/3\" or a share between 0 and 1")
   end
   return { share, a and (a .. "/" .. b) or string.format("%g%%", share * 100) }
 end
@@ -90,8 +116,12 @@ end
 return function(opts)
   opts = opts or {}
   tolerance = opts.tolerance or tolerance
-  for _, w in ipairs(opts.widths or { "1/4", "1/2", "3/4" }) do
-    table.insert(fractions, fraction(w))
+  local widths = opts.widths or { "1/4", "1/2", "3/4" }
+  for _, w in ipairs(widths) do
+    table.insert(fractions.x, fraction(w))
+  end
+  for _, h in ipairs(opts.heights or widths) do
+    table.insert(fractions.y, fraction(h))
   end
 
   local timer = hl.timer(function()
@@ -115,7 +145,11 @@ return function(opts)
       pressed = nil
       show(nil)
       if target then
-        hl.exec_cmd(snap .. " " .. target.fraction .. " " .. target.edge)
+        local commands = {}
+        for _, hit in ipairs(target.hits) do
+          table.insert(commands, snap .. " " .. hit.fraction .. " " .. hit.edge)
+        end
+        hl.exec_cmd(table.concat(commands, "; "))
       end
     end, release)
   end
