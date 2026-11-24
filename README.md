@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.svg" alt="Omarchy Window Snap: drag an edge, and it snaps to 1/4, 1/2, 3/4 or your own fractions, per workspace" width="100%"></p>
+
 # Omarchy Window Snap
 
 Snap a window to quarters of the screen width and height, eighths of the width on a wide screen, or your own fractions, when you resize it with the mouse in [Omarchy](https://omarchy.org/).
