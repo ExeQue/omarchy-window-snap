@@ -1,7 +1,8 @@
 #!/bin/bash
 # Move the edge of the focused window that was dragged with the mouse, so the
 # window takes a fraction of its monitor's usable width or height, e.g.
-# `snap.sh 0.25 right`. Called by snap-drag.lua after a resize. Only that edge
+# `snap.sh 0.25 right [address]`, for the focused window when no address is
+# given. Called by snap-drag.lua after a resize. Only that edge
 # moves, so only the neighbour on that side changes.
 #
 # Dwindle has no way to set a split directly. A relative resize of a window
@@ -13,7 +14,7 @@
 # until every boundary sits where it should.
 set -euo pipefail
 
-usage="usage: snap.sh <fraction 0-1> <left|right|top|bottom>"
+usage="usage: snap.sh <fraction 0-1> <left|right|top|bottom> [address]"
 frac=${1:?$usage}
 edge=${2:?$usage}
 [[ $frac =~ ^0?\.[0-9]+$|^1(\.0+)?$ ]] || { echo "bad fraction: $frac" >&2; exit 1; }
@@ -23,13 +24,22 @@ case $edge in
   *) echo "bad edge: $edge" >&2; exit 1 ;;
 esac
 
-win=$(hyprctl activewindow -j)
+target=${3:-}
+[[ $target =~ ^(0x[0-9a-f]+)?$ ]] || { echo "bad address: $target" >&2; exit 1; }
+if [ -n "$target" ]; then
+  win=$(hyprctl clients -j | jq --arg a "$target" '.[] | select(.address == $a)')
+else
+  win=$(hyprctl activewindow -j)
+fi
+[ -n "$win" ] || exit 0
 addr=$(jq -r '.address // empty' <<<"$win")
 [ -n "$addr" ] || exit 0
 layout=$(hyprctl workspaces -j | jq -r --argjson id "$(jq '.workspace.id' <<<"$win")" '.[] | select(.id == $id) | .tiledLayout')
 
 # The scrolling layout sizes columns as a share of the monitor itself.
 if [ "$layout" = scrolling ] && [ $ax = 0 ] && [ "$(jq '.floating' <<<"$win")" = false ]; then
+  # colresize works on the focused column.
+  hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })" >/dev/null
   hyprctl dispatch "hl.dsp.layout(\"colresize $frac\")" >/dev/null
   exit 0
 fi

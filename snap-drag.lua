@@ -34,8 +34,8 @@ local across = { x = "y", y = "x" }
 local pressed = nil -- the focused window's box when the button went down
 local shown = nil -- the snaps the guide lines show, from reach()
 
-local function box()
-  local window = hl.get_active_window()
+-- The window as it is now, as a box that keeps its numbers.
+local function box(window)
   if not window or not window.monitor then
     return nil
   end
@@ -45,6 +45,33 @@ local function box()
     at = { x = window.at.x, y = window.at.y },
     size = { x = window.size.x, y = window.size.y },
   }
+end
+
+-- The window the mouse grabs: the one under the cursor, or the nearest one
+-- whose border (plus general.extend_border_grab_area) is under it. Not the
+-- focused window: a drag on a border does not focus, and focus need not follow
+-- the mouse. A floating window lies on top, so it wins.
+local function grabbed()
+  local c = hl.get_cursor_pos()
+  local m = hl.get_monitor_at_cursor()
+  local ws = m and hl.get_active_workspace(m)
+  if not c or not ws then
+    return nil
+  end
+  local reach = hl.get_config("general.border_size") + hl.get_config("general.extend_border_grab_area")
+  local best, best_distance, best_floating = nil, math.huge, false
+  for _, w in ipairs(hl.get_workspace_windows(ws.id)) do
+    if not w.hidden then
+      local dx = math.max(w.at.x - c.x, 0, c.x - (w.at.x + w.size.x))
+      local dy = math.max(w.at.y - c.y, 0, c.y - (w.at.y + w.size.y))
+      local distance = math.max(dx, dy)
+      local floating = w.floating and distance <= reach
+      if distance <= reach and (floating and not best_floating or floating == best_floating and distance < best_distance) then
+        best, best_distance, best_floating = w, distance, floating
+      end
+    end
+  end
+  return box(best)
 end
 
 local function round(n)
@@ -139,7 +166,7 @@ return function(opts)
   end
 
   local timer = hl.timer(function()
-    local now = box()
+    local now = pressed and box(hl.get_window("address:" .. pressed.address))
     show(now and reach(now) or nil)
   end, { timeout = 30, type = "repeat" })
   timer:set_enabled(false)
@@ -149,19 +176,19 @@ return function(opts)
 
   for _, button in ipairs({ "mouse:272", "mouse:273" }) do
     hl.bind(button, function()
-      pressed = box()
+      pressed = grabbed()
       timer:set_enabled(pressed ~= nil)
     end, options)
     hl.bind(button, function()
       timer:set_enabled(false)
-      local now = box()
+      local now = pressed and box(hl.get_window("address:" .. pressed.address))
       local target = now and reach(now) or nil
       pressed = nil
       show(nil)
       if target then
         local commands = {}
         for _, hit in ipairs(target.hits) do
-          table.insert(commands, snap .. " " .. hit.fraction .. " " .. hit.edge)
+          table.insert(commands, snap .. " " .. hit.fraction .. " " .. hit.edge .. " " .. now.address)
         end
         hl.exec_cmd(table.concat(commands, "; "))
       end

@@ -9,7 +9,6 @@ Snap a window to quarters of the screen width and height, eighths of the width o
 ## Known limits
 
 - Scrolling layout: `colresize` decides which side of the column grows, so the other edge may move too. Heights there are untested.
-- The window is the one focused when the button goes down. With focus that does not follow the mouse, a drag on an unfocused window does not snap.
 - A nested split such as A | (B / (C | D)), seen from A, puts C and D in the row too; their boundary stays where it is.
 
 ## Install
@@ -46,7 +45,7 @@ A fraction shows as itself on the guide line ("1/3"), a share as a percentage ("
 ## Files
 
 - `snap-drag.lua` watches mouse resizes inside Hyprland and decides when to snap.
-- `snap.sh <fraction> <left|right|top|bottom>` moves the dragged edge of the focused window.
+- `snap.sh <fraction> <left|right|top|bottom> [address]` moves the dragged edge of that window (default the focused one).
 - `Snap.qml` is the shell overlay that draws the guide line.
 
 ## Uninstall
