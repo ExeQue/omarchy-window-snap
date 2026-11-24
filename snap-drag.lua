@@ -8,7 +8,7 @@
 --   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
 --     widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
 --     heights = { "1/2" }, -- default the widths; {} snaps no heights
---     tolerance = 0.02, -- reach, as a share of the screen width or height
+--     tolerance = 0.02, -- reach, as a share of the screen width (on both axes)
 --   })
 --
 -- The binds watch the left and right mouse buttons without taking them from
@@ -63,14 +63,19 @@ local function reach(now)
     return r[near[axis]] + go[near[axis]], size[axis] - r[far[axis]] - go[far[axis]]
   end
 
+  -- The reach in pixels, the same on both axes: tolerance is a share of the
+  -- usable screen width.
+  local wfrom, wto = span("x")
+  local reach_px = tolerance * (wto - wfrom)
+
   local hits, guides = {}, {}
   for _, a in ipairs({ "x", "y" }) do
     if now.size[a] ~= pressed.size[a] then
       local from, to = span(a)
       local sp = 2 * gi[near[a]]
-      local share = (now.size[a] + 2 * b + sp) / (to - from + sp)
+      local length = now.size[a] + 2 * b + sp
       for _, f in ipairs(fractions[a]) do
-        if math.abs(f[1] - share) <= tolerance then
+        if math.abs((to - from + sp) * f[1] - length) <= reach_px then
           -- The near edge moved when the window's position did; otherwise the far one.
           local edge = now.at[a] ~= pressed.at[a] and near[a] or far[a]
           local mine = round((to - from + sp) * f[1]) - sp
