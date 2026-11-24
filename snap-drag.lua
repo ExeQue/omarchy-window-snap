@@ -65,7 +65,8 @@ end
 local function grabbed()
   local c = hl.get_cursor_pos()
   local m = hl.get_monitor_at_cursor()
-  local ws = m and hl.get_active_workspace(m)
+  -- A special workspace that is open lies over the monitor's own one.
+  local ws = m and (hl.get_active_special_workspace(m) or hl.get_active_workspace(m))
   if not c or not ws then
     return nil
   end
