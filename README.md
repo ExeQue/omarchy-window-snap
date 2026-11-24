@@ -1,6 +1,6 @@
 # Omarchy Window Snap
 
-Snap a window to 1/4, 1/2 or 3/4 (or your own fractions) of the screen width and height when you resize it with the mouse in [Omarchy](https://omarchy.org/).
+Snap a window to eighths of the screen width and quarters of its height (or your own fractions) when you resize it with the mouse in [Omarchy](https://omarchy.org/).
 
 - Drag a window edge (or SUPER + right drag). When the dragged edge comes within 2% of the screen width of a snap point, a line shows where the edge will land. A corner drag can snap both at once.
 - Let go, and the edge snaps there. Only the dragged edge moves, so only the neighbour on that side changes.
@@ -21,7 +21,7 @@ omarchy plugin add https://github.com/ExeQue/omarchy-window-snap --enable
 Then load the mouse snapping from `~/.config/hypr/bindings.lua`:
 
 ```lua
--- Snap window width and height to 1/4, 1/2 or 3/4 after a mouse resize (exe.snap plugin).
+-- Snap window width to eighths and height to quarters after a mouse resize (exe.snap plugin).
 dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")()
 ```
 
@@ -33,8 +33,8 @@ Pass your own snap points, as fractions or shares of the screen width and height
 
 ```lua
 dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
-  widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
-  heights = { "1/2" }, -- default the widths; {} turns height snapping off
+  widths = { "1/3", "1/2", "2/3", 0.4 }, -- default eighths: { "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8" }
+  heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} turns height snapping off
   tolerance = 0.02, -- how close the edge must come, as a share of the screen width (the same pixels on both axes)
 })
 ```

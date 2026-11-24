@@ -1,13 +1,13 @@
--- Snap the focused window to 1/4, 1/2 or 3/4 of the screen width or height
--- after a resize with the mouse (SUPER + right drag, or a drag on a border),
--- when it ends within 2% of one. Only the dragged edge moves, so only the
+-- Snap the focused window to eighths of the screen width or quarters of its
+-- height (by default) after a resize with the mouse (SUPER + right drag, or a
+-- drag on a border), when it ends within 2% of the screen width of one. Only the dragged edge moves, so only the
 -- neighbour on that side changes. While the edge is within reach of a snap
 -- point, the exe.snap shell plugin draws a line where it will land.
 -- Loaded from ~/.config/hypr/bindings.lua; the file returns a setup function:
 --
 --   dofile(os.getenv("HOME") .. "/.config/omarchy/plugins/exe.snap/snap-drag.lua")({
---     widths = { "1/3", "1/2", "2/3", 0.4 }, -- default { "1/4", "1/2", "3/4" }
---     heights = { "1/2" }, -- default the widths; {} snaps no heights
+--     widths = { "1/3", "1/2", "2/3", 0.4 }, -- default eighths, "1/8" to "7/8"
+--     heights = { "1/2" }, -- default { "1/4", "1/2", "3/4" }; {} snaps no heights
 --     tolerance = 0.02, -- reach, as a share of the screen width (on both axes)
 --   })
 --
@@ -121,11 +121,10 @@ end
 return function(opts)
   opts = opts or {}
   tolerance = opts.tolerance or tolerance
-  local widths = opts.widths or { "1/4", "1/2", "3/4" }
-  for _, w in ipairs(widths) do
+  for _, w in ipairs(opts.widths or { "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8" }) do
     table.insert(fractions.x, fraction(w))
   end
-  for _, h in ipairs(opts.heights or widths) do
+  for _, h in ipairs(opts.heights or { "1/4", "1/2", "3/4" }) do
     table.insert(fractions.y, fraction(h))
   end
 
